@@ -1,272 +1,314 @@
 # ninja-shader 🥷🎬
 
-> GPU-accelerated video shader processing pipeline & live previewer in **Rust** using **`wgpu`** and **FFmpeg**.
+[![Rust 1.80+](https://img.shields.io/badge/Rust-1.80+-orange.svg?logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![wgpu 24](https://img.shields.io/badge/wgpu-v24-blue.svg?logo=webgpu&logoColor=white)](https://wgpu.rs/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Release: v1.0.0](https://img.shields.io/badge/release-v1.0.0-blueviolet.svg)](https://github.com/leouofa/ninja-shader/releases)
+[![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey.svg)](#installation--requirements)
+[![Shaders](https://img.shields.io/badge/shaders-WGSL%20%7C%20GLSL-red.svg)](#shader-library-contract-abi)
 
-`ninja-shader` applies an arbitrary sequence of reusable GPU shaders (**WGSL** and **GLSL**) to video files with sub-millisecond per-frame GPU execution, audio passthrough, and a native hot-reloading preview window.
+> **GPU-accelerated video shader processing pipeline & live creative studio in Rust using `wgpu` and FFmpeg.**
 
----
+`ninja-shader` is a high-performance creative desktop studio and CLI toolchain for chaining and hot-reloading GPU fragment shaders across video streams in real time. Designed for creative technologists, video editors, and graphics engineers, it bridges low-level hardware rendering pipelines with an interactive, hot-reloading desktop UI and lossless production video export.
 
-## Features
-
-- **Multi-Pass Sequential GPU Pipeline**: Chain any number of reusable shaders in series via declarative TOML recipe files. Output of Pass $N$ feeds directly as input to Pass $N+1$.
-- **Dual Language Support (WGSL + GLSL)**: Write shaders in modern WebGPU Shading Language (`.wgsl`) or Vulkan GLSL (`.glsl`). Both compile directly to native Metal on macOS.
-- **Sidecar Manifests**: Every shader is defined by a `<name>.toml` manifest specifying metadata, typed parameters (`float`, `int`, `uint`, `vec2`, `vec3`, `vec4`, `color`), ranges, defaults, and auxiliary textures.
-- **Temporal Feedback & Rich Context**: Shaders automatically receive `globals` (`time`, `delta_time`, `frame`, `fps`, `resolution`), `input_tex`, source video `original_tex`, and previous frame output `prev_frame_tex` for motion trails and feedback loops.
-- **Audio Passthrough & FFmpeg Integration**: Seamlessly decodes and encodes H.264 video streams while preserving original audio streams.
-- **Live Hot-Reload Preview Window**: Interactive native desktop window (`winit`) that plays video and hot-reloads shader files and parameter values instantly upon saving.
-- **Library Management**: Built-in CLI commands to `list`, `inspect`, `validate`, and scaffold `new` shaders.
+![Sample Render - Ultimate Cyberpunk Recipe](assets/preview_cyberpunk.png)
+*Sample frame rendered using the 6-pass `ultimate_cyberpunk` recipe (`duotone_cyber` → `neon_edge` → `hologram` → `digital_glitch` → `bloom` → `vignette`).*
 
 ---
 
-## Architecture
+## Key Capabilities
 
-```mermaid
-flowchart LR
-    subgraph Input["Input & Decoding"]
-        VID["Input Video (.mp4/.mov)"] --> FFMPEG_DEC["FFmpeg Decoder (RGBA8 pipe)"]
-        AUX["Aux Textures / PNGs"] --> TEX_LOAD["image crate Loader"]
-    end
+- ⚡ **Sub-Millisecond Multi-Pass GPU Engine**: Chain arbitrary sequences of reusable WGSL and GLSL fragment shaders in series. Framebuffers alternate across ping-pong textures with zero CPU-GPU copy bottlenecks.
+- 🎛️ **Native Desktop Studio GUI (`egui` + `wgpu`)**: Full-featured interactive studio featuring video scrubbing, playback controls, live uniform sliders, keyboard-driven recipe hot-swapping, and non-blocking background video export.
+- 🔥 **Instant Live Hot-Reloading**: Integrated file watcher (`notify`) recompiles shaders and updates parameters on the fly the moment you save your file—never pause or restart playback to iterate.
+- 🔊 **Lossless Audio Passthrough**: High-throughput FFmpeg pipe streaming decodes video frames to raw RGBA8 while transparently muxing the original multichannel audio stream back into the rendered output.
+- ⏳ **Temporal Feedback & Motion Buffers**: Direct shader access to previous frame outputs (`prev_frame_tex`) and unmodified source video (`original_tex`), enabling analog datamosh, phosphor decay, and persistent echo trails.
+- 🌐 **Dual Language ABI (WGSL + GLSL)**: Write shaders in modern WebGPU Shading Language (`.wgsl`) or Vulkan GLSL (`.glsl`). Naga transparently compiles both to native Metal (macOS), Vulkan (Linux), or DirectX 12 (Windows).
+- 📦 **Declarative Sidecar Manifests**: Every shader is paired with a `<name>.toml` manifest specifying strongly typed uniform parameters (`float`, `int`, `vec2`, `vec3`, `vec4`, `color`), ranges, defaults, and custom auxiliary textures.
+- 🧰 **Complete Shader Toolchain**: Built-in CLI commands to scaffold new shaders, inspect parameter ABIs, discover available effects, and validate pipelines headlessly in CI/CD.
 
-    subgraph GPU["wgpu Multi-Pass Engine"]
-        ORIG["original_texture (Source Frame)"]
-        PING["Ping Texture A"]
-        PONG["Pong Texture B"]
-        PREV["prev_frame_texture (Feedback)"]
-        UBO["BindGroup 0: Globals + Pass Params + Samplers"]
+---
 
-        FFMPEG_DEC --> ORIG
-        ORIG -->|"Pass 0 Input"| PING
-        PING <-->|"Pass 1..N Sequential Ping-Pong"| PONG
-        PONG -->|"Copy Final Pass"| PREV
-    end
+## Studio GUI & Creator Workflow
 
-    subgraph Output["Output Modes"]
-        PONG --> READBACK["GPU Readback Buffer"]
-        READBACK --> FFMPEG_ENC["FFmpeg Encoder (+ Audio Passthrough)"]
-        READBACK --> PNG_OUT["Single Frame PNG (--frame)"]
-        PONG --> WINIT["winit Surface (Live Hot-Reload Preview)"]
-    end
+Launch the native studio interface with a single command:
+
+```bash
+cargo run --release -- gui -i input.mp4 -p pipelines/retro_crt.toml
 ```
 
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 🥷 ninja-shader Studio                                                      │
+├───────────────────────┬─────────────────────────────────────────────────────┤
+│ 📁 Video & Output     │                                                     │
+│ [Open Video...]       │                 VIEWPORT DISPLAY                    │
+│ [Set Output Dir...]   │             (Zero-Latency GPU Canvas)               │
+├───────────────────────┤                                                     │
+│ 📜 Pipeline Recipes   │                                                     │
+│ > retro_crt           │                                                     │
+│   synthwave_outrun    │                                                     │
+│   ultimate_cyberpunk  ├─────────────────────────────────────────────────────┤
+│   matrix_terminal     │ ▶ [Play]  00:04.12 / 00:15.00 [===========-------] │
+├───────────────────────┼─────────────────────────────────────────────────────┤
+│ 🎚️ Shader Parameters  │ 🚀 Export Queue                                     │
+│ [Pass 1: Scanlines]   │ [Render Video]   Progress: [=============>] 68%     │
+│   curvature: ──●──    │ Output: output/retro_crt.mp4 (48.2 FPS)             │
+│   intensity: ────●    │                                                     │
+└───────────────────────┴─────────────────────────────────────────────────────┘
+```
+
+### Creator Workflow Highlights
+
+- **Live Recipe Hot-Swapping**: Select the pipeline list and press the **`↑` / `↓` arrow keys** to switch instantly between 32 included pipeline recipes while video plays seamlessly.
+- **Real-Time Parameter Tuning**: Drag sliders and color pickers for any active pass; uniform buffers re-pack and update on the GPU every frame.
+- **Non-Blocking Background Export**: Click **Render Video** to kick off an asynchronous background render. An animated progress bar tracks completion percentage, rendered frames, and export FPS without dropping preview framerates.
+- **Interactive Preview Controls**:
+  - `Space` — Toggle Play / Pause
+  - `R` — Restart playback from frame 0
+  - `S` — Export current processed frame as an uncompressed PNG screenshot
+  - `↑` / `↓` — Step through recipes in Studio GUI
+  - `Esc` / `Q` — Close window
+
 ---
 
-## Installation & Requirements
+## 30-Second Quickstart
+
+### 1. Requirements
 
 Ensure `ffmpeg` and `ffprobe` are installed on your system:
 
 ```bash
 # macOS
 brew install ffmpeg
+
+# Ubuntu / Debian
+sudo apt update && sudo apt install -y ffmpeg
+
+# Windows (Chocolatey)
+choco install ffmpeg
 ```
 
-Build the release binary:
+### 2. Build & Launch
 
 ```bash
+# Clone repository
+git clone https://github.com/leouofa/ninja-shader.git
+cd ninja-shader
+
+# Build release binary
 cargo build --release
+
+# Launch Studio GUI with sample video
+./target/release/ninja-shader gui -i test_input.mp4
 ```
 
-The compiled binary will be located at `./target/release/ninja-shader`.
+### 3. CLI Video Rendering
+
+Render a full multi-pass pipeline directly from the terminal:
+
+```bash
+./target/release/ninja-shader render \
+  --pipeline pipelines/retro_crt.toml \
+  -i input.mp4 \
+  -o output.mp4 \
+  --crf 18
+```
 
 ---
 
-## CLI Usage
+## Visual Recipes & Effect Showcase
 
-### 1. Studio GUI (Live Previewer & Renderer)
-Launch the native desktop studio interface:
+Pipelines are declared in simple, human-readable TOML files that chain any combination of shaders in series:
 
-```bash
-ninja-shader gui
+```mermaid
+flowchart LR
+    SRC[("Source Video")] --> P1["Pass 1<br/><b>duotone_cyber</b>"]
+    P1 -->|"Ping Texture"| P2["Pass 2<br/><b>neon_edge</b>"]
+    P2 -->|"Pong Texture"| P3["Pass 3<br/><b>hologram</b>"]
+    P3 -->|"Ping Texture"| P4["Pass 4<br/><b>digital_glitch</b>"]
+    P4 -->|"Pong Texture"| P5["Pass 5<br/><b>bloom</b>"]
+    P5 -->|"Ping Texture"| P6["Pass 6<br/><b>vignette</b>"]
+    P6 --> OUT[("Final Rendered Video<br/>(H.264 + Muxed Audio)")]
 ```
 
-Or pre-populate an input video, output directory, or pipeline:
+### Curated Creative Effect Library (28 Built-In Shaders)
 
-```bash
-ninja-shader gui -i input.mp4 -o output/ -p pipelines/retro_crt.toml
+#### 👾 1. Cyberpunk, Glitch & Datamosh
+| Shader | Lang | Description & Creative Applications |
+| :--- | :---: | :--- |
+| `digital_glitch` | WGSL | Scan-band slice tearing, random block displacement, and chroma shifts |
+| `datamosh` | WGSL | Macroblock motion-vector smearing and simulated I-frame drops via temporal buffer |
+| `pixel_sort` | WGSL | Directional luminance-threshold pixel sorting and streak smearing |
+| `rgb_wave` | WGSL | Sinusoidal and sawtooth horizontal wave distortion with phase-offset RGB channels |
+| `block_corrupt` | WGSL | MPEG macroblock corruption with UV channel swapping, bit-crushing, and inversion |
+
+#### 🌆 2. Neon, Synthwave & Glow
+| Shader | Lang | Description & Creative Applications |
+| :--- | :---: | :--- |
+| `bloom` | WGSL | Luminance bright-pass extraction with dual-ring Gaussian glow diffusion |
+| `neon_edge` | WGSL | 3×3 Sobel gradient edge detection rendered as vibrant, pulsing contours |
+| `synthwave_grid` | WGSL | Outrun-style perspective scrolling laser floor grid with horizon haze |
+| `duotone_cyber` | WGSL | Stylized split-toning mapping shadows and highlights across custom neon palettes |
+| `halation` | WGSL | Red-orange film emulsion halation scatter around high-contrast light sources |
+
+#### 🥽 3. Sci-Fi HUD & Tactical Visors
+| Shader | Lang | Description & Creative Applications |
+| :--- | :---: | :--- |
+| `hologram` | WGSL | Volumetric hologram with raster scanlines, rolling sync bars, and transmission flicker |
+| `night_vision` | WGSL | Tactical Gen-3 green phosphor goggles with IR amplification and circular optical mask |
+| `thermal_infrared` | WGSL | FLIR false-color thermal heat imaging with ironbow gradients and isotherm contours |
+| `radar_hud` | WGSL | Tactical visor overlay with rotating radar sweep, crosshairs, and corner brackets |
+| `vhs_tracking` | WGSL | Analog tape tracking errors, tape head-switching static, and horizontal sync jitter |
+
+#### 📺 4. Analog, CRT & Retro Cinema
+| Shader | Lang | Description & Creative Applications |
+| :--- | :---: | :--- |
+| `vhs_chroma_bleed`| WGSL | YIQ/YUV color-space separation with low-pass horizontal chrominance smearing |
+| `crt_scanlines` | WGSL | CRT barrel screen curvature, phosphor scanlines, and vignette bezel |
+| `film_grain` | GLSL | Temporal hash-based 35mm film grain noise driven by frame counter & time |
+| `ascii_matrix` | WGSL | Procedural digital cellular glyph quantization with falling code rain trails |
+| `halftone_cyber` | WGSL | Rotated CMYK / LED dot-matrix halftone screen pattern with variable dot scale |
+
+#### 🛠️ 5. Cinematic Essentials & Utilities
+| Shader | Lang | Description & Creative Applications |
+| :--- | :---: | :--- |
+| `chromatic_aberration` | GLSL | Radial optical lens prism splitting driven by configurable spread amount |
+| `motion_trails` | WGSL | Phosphor decay and ghosting persistence using `prev_frame_tex` feedback |
+| `texture_overlay` | WGSL | External image/film dirt pattern blending with adjustable opacity and UV scale |
+| `pixelate` | WGSL | Aspect-ratio aware pixel grid quantization with optional color bit-depth crushing |
+| `kaleido_prism` | WGSL | Radial N-fold mirror symmetry kaleidoscope distortion with continuous rotation |
+| `vignette` | WGSL | Smooth radial edge falloff with intensity, radius, softness, and tint control |
+| `grayscale` | WGSL | Rec. 709 luminance desaturation with adjustable blend strength |
+| `sepia` | WGSL | Warm vintage photographic toning |
+
+---
+
+## 32 Turnkey Pipeline Recipes
+
+`ninja-shader` includes 32 production-ready recipes in `pipelines/` ready to run out of the box:
+
+| Recipe File | Passes | Visual Aesthetic |
+| :--- | :---: | :--- |
+| `ultimate_cyberpunk.toml` | 6 | Duotone split → Neon edge → Hologram → Glitch → Bloom → Vignette |
+| `retro_crt.toml` | 5 | Chromatic aberration → CRT curvature/scanlines → Trails → Grain → Vignette |
+| `synthwave_outrun.toml` | 5 | Duotone → Perspective laser grid → Bloom glow → CRT scanlines → Vignette |
+| `matrix_terminal.toml` | 5 | Falling ASCII glyphs → Bloom → CRT scanlines → Motion trails → Vignette |
+| `datamosh_breakdown.toml`| 4 | Motion-vector smearing → Macroblock corrupt → Glitch → Chromatic aberration |
+| `tactical_nvg.toml` | 5 | Night vision phosphor → Radar HUD overlay → Bloom → Film grain → Vignette |
+| `predator_thermal.toml` | 4 | FLIR thermal ironbow → Tactical HUD → CRT scanlines → Chromatic aberration |
+| `analog_broadcast_1984.toml`| 5 | VHS chroma smearing → CRT scanlines → Halation → Film grain → Vignette |
+| `glitch_art_gallery.toml` | 4 | Pixel sort smearing → Macroblock corruption → RGB wave → Halftone dot matrix |
+| `noir_film.toml` | 4 | Rec. 709 black & white → Dirty texture overlay → Film grain → Deep vignette |
+
+*Explore all 32 recipes in [`pipelines/`](pipelines/).*
+
+---
+
+## Engine Architecture Under the Hood
+
+```mermaid
+flowchart TD
+    subgraph Ingest["1. Input & Demuxing"]
+        VID["Input Video (.mp4 / .mov / .mkv)"] --> FFMPEG_DEC["FFmpeg Decoder (Pipe: Raw RGBA8)"]
+        VID -.->|"Transparent Passthrough"| AUDIO["Preserved Audio Stream"]
+        AUX["Auxiliary Textures (PNG / JPEG)"] --> IMG_LOAD["image crate Loader"]
+    end
+
+    subgraph GPU["2. wgpu Multi-Pass Render Loop"]
+        ORIG["original_tex (Source Frame)"]
+        PREV["prev_frame_tex (Frame N-1 Feedback)"]
+        PING["Ping Texture (A)"]
+        PONG["Pong Texture (B)"]
+        
+        FFMPEG_DEC -->|"Upload Frame"| ORIG
+        ORIG -->|"Initial Input"| PING
+        PING <-->|"Pass 1..N Sequential Ping-Pong Execution"| PONG
+        PONG -->|"Copy Last Pass Output"| PREV
+    end
+
+    subgraph Dispatch["3. Output Dispatch"]
+        PONG -->|"Render"| WINIT["winit / egui Viewport (Studio GUI & Live Preview)"]
+        PONG -->|"Readback Buffer"| PNG_EXPORT["Single Frame PNG (--frame)"]
+        PONG -->|"Readback Buffer"| FFMPEG_ENC["FFmpeg H.264 Encoder"]
+        AUDIO -->|"Mux Audio"| FFMPEG_ENC
+        FFMPEG_ENC --> FINAL["Master Video Output (.mp4)"]
+    end
 ```
 
-**Studio GUI Features:**
-- **File Picker**: Native macOS/OS open dialog to pick any video file (`mp4`, `mov`, `mkv`, `avi`, `webm`).
-- **Output Directory**: Native OS directory picker to configure the output render directory.
-- **Pipeline Browser & Keyboard Navigation**: Live searchable list of all 30+ pipeline recipes; press **`↑` / `↓` arrow keys** to effortlessly step through and hot-swap shaders live on the playing video.
-- **Pass Parameter Sliders**: Tweak live shader uniform parameters (floats, ints, colors) and watch immediate visual results.
-- **Background Rendering**: Render full videos with real-time animated progress bar, percentage, FPS, and cancellation support without freezing playback.
-- **Playback Bar**: Play/pause, seek scrubber, restart, and loop controls.
+### The Shader Contract (ABI)
 
-### 2. Render Video Pipeline (CLI)
+Every fragment shader automatically receives a standardized, zero-boilerplate runtime context:
 
+#### Group 0: Video & Timing Context
+- `globals.resolution`: `vec2<f32>` — Current frame width and height in pixels
+- `globals.inv_resolution`: `vec2<f32>` — Reciprocal pixel step (`1.0 / width`, `1.0 / height`)
+- `globals.time`: `f32` — Total elapsed video playback time in seconds
+- `globals.delta_time`: `f32` — Elapsed time since previous frame (`1.0 / fps`)
+- `globals.frame`: `u32` — Monotonically increasing frame index
+- `globals.fps`: `f32` — Video frame rate
+- `linear_sampler` & `nearest_sampler` — Built-in hardware texture samplers
+- `input_tex` — Output texture from the immediately preceding pass
+- `original_tex` — Untouched source video frame for this timestamp
+- `prev_frame_tex` — Output of the final pass from the previous frame ($N - 1$)
+
+#### Group 1: Custom Uniforms & Textures
+- `params` — Dynamically packed uniform struct matching declarations in `<name>.toml`
+- `custom_textures` — Any auxiliary images or lookup tables bound from the recipe
+
+---
+
+## CLI Command Reference
+
+`ninja-shader` provides a comprehensive command-line suite:
+
+### `gui` — Launch Desktop Studio
 ```bash
-ninja-shader render --pipeline pipelines/retro_crt.toml -i input.mp4 -o output.mp4
+ninja-shader gui [-i <VIDEO>] [-p <PIPELINE>] [-o <OUTPUT_DIR>]
 ```
 
-CLI options:
-- `--pipeline <PATH>`: Path to pipeline recipe TOML file
-- `-i, --input <PATH>`: Override input video file
-- `-o, --output <PATH>`: Override output video/image file
-- `--frame <N>`: Render only frame index `N` (0-based) to PNG
-- `--scale <FLOAT>`: Scale resolution (e.g. `0.5` for fast half-res preview renders)
-- `--crf <INT>`: H.264 CRF quality factor (0-51, default `18`)
-- `--start <SEC>`: Start offset in seconds
-- `--duration <SEC>`: Duration in seconds to process
+### `render` — Process Video or Single Frame
+```bash
+ninja-shader render --pipeline <PATH> [OPTIONS]
 
-### 2. Live Hot-Reload Preview Window
-Open the native desktop preview window to watch video playback and tune shaders live:
+Options:
+  -i, --input <PATH>      Override input video file
+  -o, --output <PATH>     Override output video / image file
+      --frame <N>         Render only frame index N (0-based) to PNG
+      --scale <FLOAT>     Resolution scale multiplier (e.g. 0.5 for fast half-res preview)
+      --crf <INT>         H.264 CRF quality factor (0-51, default: 18)
+      --start <SEC>       Start offset in seconds
+      --duration <SEC>    Duration in seconds to process
+```
 
+### `preview` — Lightweight Hot-Reloading Viewport
 ```bash
 ninja-shader preview --pipeline pipelines/retro_crt.toml -i input.mp4
 ```
 
-**Keyboard Controls in Preview Window:**
-- `Space`: Pause / Resume playback
-- `R`: Restart video from frame 0
-- `S`: Save current processed frame as a timestamped PNG screenshot
-- `Esc` / `Q`: Exit
-
-> **Hot-Reloading**: Edit any parameter in `pipelines/retro_crt.toml` or any shader in `shaders/` and save the file. The preview window updates instantly without restarting playback.
-
-### 3. List Available Shaders
+### `list` — Discover Library Shaders
 ```bash
 ninja-shader list
 ```
-Displays all discoverable WGSL and GLSL shaders in the library along with descriptions and configurable parameters.
 
-### 4. Inspect Shader Details
+### `inspect` — View Shader ABI & Parameters
 ```bash
 ninja-shader inspect crt_scanlines
 ```
-Prints language, parameters, types, ranges, defaults, and custom textures.
 
-### 5. Scaffold a New Shader
+### `new` — Scaffold a New Shader
 ```bash
-ninja-shader new glitch --lang wgsl
-# or for GLSL:
-ninja-shader new neon --lang glsl
+ninja-shader new glitch_blast --lang wgsl
+# or for Vulkan GLSL:
+ninja-shader new glitch_blast --lang glsl
 ```
-Creates `shaders/<name>.toml` and boilerplate `shaders/<name>.wgsl` (or `.glsl`).
+*Generates boilerplate `shaders/glitch_blast.toml` and `shaders/glitch_blast.wgsl` automatically.*
 
-### 6. Validate Pipeline Recipe
+### `validate` — Headless Pipeline Verification
 ```bash
 ninja-shader validate --pipeline pipelines/retro_crt.toml
 ```
-Verifies all passes, parameters, and performs headless GPU shader compilation to ensure the recipe is ready for production rendering.
-
----
-
-## Shader Library Contract (ABI)
-
-Every fragment shader receives:
-
-### Group 0 (Built-In Video Context)
-- `@group(0) @binding(0) var<uniform> globals: Globals;`
-  - `globals.resolution`: `vec2<f32>` (width, height in pixels)
-  - `globals.inv_resolution`: `vec2<f32>` (1.0 / width, 1.0 / height)
-  - `globals.time`: `f32` (elapsed seconds)
-  - `globals.delta_time`: `f32` (1.0 / fps)
-  - `globals.frame`: `u32` (current frame number)
-  - `globals.fps`: `f32` (frame rate)
-- `@group(0) @binding(1) var linear_sampler: sampler;`
-- `@group(0) @binding(2) var nearest_sampler: sampler;`
-- `@group(0) @binding(3) var input_tex: texture_2d<f32>;` (output of previous shader pass)
-- `@group(0) @binding(4) var original_tex: texture_2d<f32>;` (unmodified source video frame)
-- `@group(0) @binding(5) var prev_frame_tex: texture_2d<f32>;` (final output from frame $N-1$)
-
-### Group 1 (Custom Shader Parameters & Auxiliary Textures)
-- `@group(1) @binding(0) var<uniform> params: Params;` (dynamically packed uniform buffer)
-- `@group(1) @binding(1..N)` (custom textures declared in `[[textures]]`)
-
-*Note: Group 0 and Group 1 headers are auto-injected if not explicitly declared in your shader file.*
-
----
-
-## Included Shader Library (28 Shaders)
-
-### 1. Cyberpunk, Glitch & Datamosh
-| Shader | Language | Features |
-| :--- | :---: | :--- |
-| `digital_glitch` | WGSL | Scan-band tearing, random slice displacement, and RGB chroma shifts |
-| `datamosh` | WGSL | Macroblock motion-vector smearing and I-frame drop via `prev_frame_tex` |
-| `pixel_sort` | WGSL | Directional luminance threshold pixel sorting and streak smearing |
-| `rgb_wave` | WGSL | Sinusoidal and sawtooth horizontal wave distortion with phase-offset RGB |
-| `block_corrupt` | WGSL | MPEG macroblock corruption with UV swapping, bit-crushing, and inversion |
-
-### 2. Neon & Synthwave
-| Shader | Language | Features |
-| :--- | :---: | :--- |
-| `bloom` | WGSL | Bright-pass extraction and dual-ring Gaussian glow diffusion |
-| `neon_edge` | WGSL | 3x3 Sobel gradient edge detection rendered as pulsing neon contours |
-| `synthwave_grid` | WGSL | Outrun perspective scrolling laser floor grid and horizon haze |
-| `duotone_cyber` | WGSL | Cyberpunk split-toning mapping shadows & highlights across neon palettes |
-| `halation` | WGSL | Red-orange film emulsion halation scatter around high-contrast edges |
-
-### 3. Sci-Fi HUD & Hologram
-| Shader | Language | Features |
-| :--- | :---: | :--- |
-| `hologram` | WGSL | Volumetric hologram with interference lines, rolling sync bar, and flicker |
-| `night_vision` | WGSL | Tactical Gen-3 green phosphor goggles with IR amplification and tube mask |
-| `thermal_infrared` | WGSL | FLIR false-color thermal heat imaging with ironbow gradients & isotherms |
-| `radar_hud` | WGSL | Tactical visor HUD with rotating radar sweep, reticles, and corner framing |
-| `vhs_tracking` | WGSL | Analog VHS tape tracking error bars, head-switching noise, and line jitter |
-
-### 4. Cyber Stylization & Analog
-| Shader | Language | Features |
-| :--- | :---: | :--- |
-| `ascii_matrix` | WGSL | Procedural cellular glyph quantization with falling digital rain trails |
-| `pixelate` | WGSL | Aspect-aware pixel grid quantization with optional color bit-depth crushing |
-| `halftone_cyber` | WGSL | Rotated CMYK / Neon LED dot-matrix halftone screen pattern |
-| `kaleido_prism` | WGSL | Radial N-fold mirror symmetry prism distortion with continuous rotation |
-| `vhs_chroma_bleed` | WGSL | YIQ/YUV luma-chroma separation with low-pass horizontal chrominance smearing |
-
-### 5. Starter Utility & Cinema Shaders
-| Shader | Language | Features |
-| :--- | :---: | :--- |
-| `grayscale` | WGSL | Rec. 709 luminance desaturation with `strength` parameter |
-| `vignette` | WGSL | Radial edge vignette with `intensity`, `radius`, `softness`, and `tint` |
-| `chromatic_aberration` | GLSL | RGB radial channel splitting driven by `amount` |
-| `crt_scanlines` | WGSL | Barrel screen distortion, animated scanlines, and CRT bezel |
-| `film_grain` | GLSL | Temporal hash-based film grain noise driven by frame & time |
-| `motion_trails` | WGSL | Phosphor decay and ghosting using `prev_frame_tex` feedback |
-| `texture_overlay` | WGSL | External image/pattern texture blending with `opacity` and `uv_scale` |
-| `sepia` | WGSL | Warm vintage tint adjustment |
-
----
-
-## Included Pipeline Recipes (32 Recipes)
-
-`ninja-shader` includes 32 production-ready recipes in `pipelines/`:
-
-1. `cyber_runner.toml` (5 passes: `duotone_cyber` → `halation` → `bloom` → `film_grain` → `vignette`)
-2. `ghost_hologram.toml` (5 passes: `hologram` → `neon_edge` → `rgb_wave` → `bloom` → `crt_scanlines`)
-3. `datamosh_breakdown.toml` (4 passes: `datamosh` → `block_corrupt` → `digital_glitch` → `chromatic_aberration`)
-4. `synthwave_outrun.toml` (5 passes: `duotone_cyber` → `synthwave_grid` → `bloom` → `crt_scanlines` → `vignette`)
-5. `matrix_terminal.toml` (5 passes: `ascii_matrix` → `bloom` → `crt_scanlines` → `motion_trails` → `vignette`)
-6. `predator_thermal.toml` (4 passes: `thermal_infrared` → `radar_hud` → `crt_scanlines` → `chromatic_aberration`)
-7. `tactical_nvg.toml` (5 passes: `night_vision` → `radar_hud` → `bloom` → `film_grain` → `vignette`)
-8. `corrupted_vhs.toml` (5 passes: `vhs_chroma_bleed` → `vhs_tracking` → `rgb_wave` → `film_grain` → `vignette`)
-9. `pixel_sort_meltdown.toml` (4 passes: `pixel_sort` → `duotone_cyber` → `bloom` → `chromatic_aberration`)
-10. `neon_wireframe.toml` (4 passes: `neon_edge` → `bloom` → `motion_trails` → `vignette`)
-11. `arcade_16bit.toml` (5 passes: `pixelate` → `duotone_cyber` → `crt_scanlines` → `bloom` → `vignette`)
-12. `cyber_halftone_press.toml` (4 passes: `duotone_cyber` → `halftone_cyber` → `neon_edge` → `vignette`)
-13. `kaleido_cyber_trip.toml` (5 passes: `kaleido_prism` → `duotone_cyber` → `neon_edge` → `bloom` → `chromatic_aberration`)
-14. `drone_recon_hud.toml` (5 passes: `grayscale` → `neon_edge` → `radar_hud` → `vhs_tracking` → `crt_scanlines`)
-15. `neural_overload.toml` (6 passes: `rgb_wave` → `pixel_sort` → `digital_glitch` → `neon_edge` → `bloom` → `vignette`)
-16. `analog_broadcast_1984.toml` (5 passes: `vhs_chroma_bleed` → `crt_scanlines` → `halation` → `film_grain` → `vignette`)
-17. `holodeck_malfunction.toml` (5 passes: `hologram` → `block_corrupt` → `digital_glitch` → `synthwave_grid` → `bloom`)
-18. `infrared_sat_link.toml` (5 passes: `thermal_infrared` → `pixelate` → `radar_hud` → `vhs_tracking` → `vignette`)
-19. `cyber_noir_rain.toml` (5 passes: `grayscale` → `halation` → `ascii_matrix` → `bloom` → `vignette`)
-20. `glitch_art_gallery.toml` (4 passes: `pixel_sort` → `block_corrupt` → `rgb_wave` → `halftone_cyber`)
-21. `vhs_cyber_dub.toml` (5 passes: `duotone_cyber` → `vhs_chroma_bleed` → `vhs_tracking` → `motion_trails` → `crt_scanlines`)
-22. `laser_grid_visor.toml` (5 passes: `synthwave_grid` → `neon_edge` → `radar_hud` → `bloom` → `chromatic_aberration`)
-23. `deep_net_dive.toml` (5 passes: `ascii_matrix` → `kaleido_prism` → `neon_edge` → `bloom` → `motion_trails`)
-24. `security_cam_hack.toml` (5 passes: `night_vision` → `digital_glitch` → `vhs_tracking` → `pixelate` → `crt_scanlines`)
-25. `chroma_prism_dream.toml` (5 passes: `kaleido_prism` → `halation` → `bloom` → `chromatic_aberration` → `motion_trails`)
-26. `signal_jammed.toml` (5 passes: `rgb_wave` → `vhs_tracking` → `block_corrupt` → `digital_glitch` → `film_grain`)
-27. `neon_halftone_arcade.toml` (5 passes: `pixelate` → `halftone_cyber` → `neon_edge` → `bloom` → `crt_scanlines`)
-28. `bio_scanner_xray.toml` (5 passes: `grayscale` → `neon_edge` → `hologram` → `radar_hud` → `bloom`)
-29. `temporal_datamosh_echo.toml` (5 passes: `datamosh` → `motion_trails` → `duotone_cyber` → `halation` → `vignette`)
-30. `ultimate_cyberpunk.toml` (6 passes: `duotone_cyber` → `neon_edge` → `hologram` → `digital_glitch` → `bloom` → `vignette`)
-31. `retro_crt.toml` (5 passes: `chromatic_aberration` → `crt_scanlines` → `motion_trails` → `film_grain` → `vignette`)
-32. `noir_film.toml` (4 passes: `grayscale` → `texture_overlay` → `film_grain` → `vignette`)
-
----
+*Compiles all shaders and verifies parameter schemas against the GPU without launching a window.*
 
 ---
 
@@ -274,7 +316,7 @@ Every fragment shader receives:
 
 ```toml
 name = "retro_crt"
-description = "Vintage CRT TV look"
+description = "Vintage CRT television with phosphor scanlines and curvature"
 input = "test_input.mp4"
 output = "output_retro_crt.mp4"
 
@@ -320,3 +362,22 @@ radius = 0.75
 softness = 0.40
 tint = [0.0, 0.0, 0.0]
 ```
+
+---
+
+## Tech Stack & Architecture Highlights
+
+- **Language**: Modern Rust (2021 Edition)
+- **Graphics API**: [`wgpu 24`](https://github.com/gfx-rs/wgpu) (WebGPU implementation running natively over Metal, Vulkan, and DirectX 12)
+- **Shader Translation**: [`naga 24`](https://github.com/gfx-rs/wgpu/tree/master/naga) (Cross-compilation for WGSL & GLSL fragment stages)
+- **Studio Interface**: [`egui 0.31`](https://github.com/emilk/egui) with `egui-wgpu` and `winit 0.30`
+- **Video Processing**: FFmpeg streaming pipes via `std::process::Command` (raw RGBA8 multiplexing & AAC/MP3 audio passthrough)
+- **Live File Watcher**: [`notify 6.1`](https://github.com/notify-rs/notify) (Cross-platform filesystem event debouncing)
+- **Serialization**: [`serde`](https://serde.rs/) & [`toml`](https://github.com/toml-rs/toml)
+- **CLI Framework**: [`clap 4.5`](https://github.com/clap-rs/clap) with derive macros
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
