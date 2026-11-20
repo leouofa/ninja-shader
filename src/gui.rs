@@ -135,6 +135,7 @@ pub struct GuiApp {
 
     // Notifications
     notification: Option<(String, bool, Instant)>,
+    scroll_to_selected: bool,
 }
 
 impl GuiApp {
@@ -213,6 +214,7 @@ impl GuiApp {
             blit_bg_layout: None,
             blit_sampler: None,
             notification: None,
+            scroll_to_selected: false,
         };
 
         // If we have an input video path, set it
@@ -328,6 +330,68 @@ impl GuiApp {
                 self.set_notification(format!("Failed to load pipeline: {:#}", e), true);
             }
         }
+    }
+
+    fn get_filtered_pipeline_indices(&self) -> Vec<usize> {
+        let filter_lower = self.pipeline_filter.to_lowercase();
+        self.pipeline_items
+            .iter()
+            .enumerate()
+            .filter(|(_, item)| {
+                filter_lower.is_empty()
+                    || item.name.to_lowercase().contains(&filter_lower)
+                    || item.filename.to_lowercase().contains(&filter_lower)
+            })
+            .map(|(idx, _)| idx)
+            .collect()
+    }
+
+    fn select_next_pipeline(&mut self) {
+        let indices = self.get_filtered_pipeline_indices();
+        if indices.is_empty() {
+            return;
+        }
+
+        let current_pos = self
+            .selected_pipeline_path
+            .as_ref()
+            .and_then(|p| indices.iter().position(|&idx| &self.pipeline_items[idx].path == p));
+
+        let next_idx = match current_pos {
+            Some(pos) => indices[(pos + 1) % indices.len()],
+            None => indices[0],
+        };
+
+        let path = self.pipeline_items[next_idx].path.clone();
+        self.load_pipeline(&path);
+        self.scroll_to_selected = true;
+    }
+
+    fn select_prev_pipeline(&mut self) {
+        let indices = self.get_filtered_pipeline_indices();
+        if indices.is_empty() {
+            return;
+        }
+
+        let current_pos = self
+            .selected_pipeline_path
+            .as_ref()
+            .and_then(|p| indices.iter().position(|&idx| &self.pipeline_items[idx].path == p));
+
+        let prev_idx = match current_pos {
+            Some(pos) => {
+                if pos == 0 {
+                    indices[indices.len() - 1]
+                } else {
+                    indices[pos - 1]
+                }
+            }
+            None => indices[indices.len() - 1],
+        };
+
+        let path = self.pipeline_items[prev_idx].path.clone();
+        self.load_pipeline(&path);
+        self.scroll_to_selected = true;
     }
 
     fn reinit_engine(&mut self) {
@@ -813,11 +877,26 @@ impl ApplicationHandler for GuiApp {
         };
 
         // Forward event to egui
+        let mut egui_consumed = false;
         if let Some(ref mut state) = self.egui_winit_state {
             let response = state.on_window_event(&window, &event);
-            if response.consumed {
-                return;
+            egui_consumed = response.consumed;
+        }
+
+        let is_arrow_nav = matches!(
+            &event,
+            WindowEvent::KeyboardInput {
+                event: KeyEvent {
+                    logical_key: Key::Named(NamedKey::ArrowUp | NamedKey::ArrowDown),
+                    state: ElementState::Pressed,
+                    ..
+                },
+                ..
             }
+        );
+
+        if egui_consumed && self.egui_ctx.wants_keyboard_input() && !is_arrow_nav {
+            return;
         }
 
         match event {
@@ -843,6 +922,12 @@ impl ApplicationHandler for GuiApp {
                     },
                 ..
             } => match logical_key {
+                Key::Named(NamedKey::ArrowUp) => {
+                    self.select_prev_pipeline();
+                }
+                Key::Named(NamedKey::ArrowDown) => {
+                    self.select_next_pipeline();
+                }
                 Key::Named(NamedKey::Space) => {
                     self.paused = !self.paused;
                     self.set_notification(
@@ -1096,11 +1181,15 @@ impl GuiApp {
                                             if resp.clicked() && !is_selected {
                                                 new_pipeline_to_load = Some(item.path.clone());
                                             }
+                                            if is_selected && self.scroll_to_selected {
+                                                resp.scroll_to_me(Some(egui::Align::Center));
+                                            }
                                             if !item.description.is_empty() {
                                                 resp.on_hover_text(&item.description);
                                             }
                                         }
                                     });
+                                self.scroll_to_selected = false;
                             });
 
                             ui.add_space(10.0);
