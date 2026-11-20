@@ -1,0 +1,37 @@
+name = "halftone_cyber"
+description = "Rotated CMYK / Neon LED dot-matrix halftone screen pattern"
+author = "ninja-shader"
+language = "wgsl"
+source = "halftone_cyber.wgsl"
+
+[[params]]
+name = "dot_scale"
+type = "float"
+default = 90.0
+min = 20.0
+max = 300.0
+description = "Halftone dot grid frequency"
+
+[[params]]
+name = "angle"
+type = "float"
+default = 0.52
+min = 0.0
+max = 1.57
+description = "Screen rotation angle in radians"
+
+[[params]]
+name = "contrast"
+type = "float"
+default = 1.25
+min = 0.5
+max = 3.0
+description = "Dot size response contrast"
+
+[[params]]
+name = "blend"
+type = "float"
+default = 0.75
+min = 0.0
+max = 1.0
+description = "Halftone pattern blend amount"

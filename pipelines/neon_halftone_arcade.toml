@@ -1,0 +1,51 @@
+name = "neon_halftone_arcade"
+description = "LED dot-matrix pinball and arcade marquee display with neon contours and CRT curvature"
+input = "test_input.mp4"
+output = "output/neon_halftone_arcade.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "pixelate"
+enabled = true
+[passes.params]
+pixel_size = 4.0
+color_levels = 16.0
+grid_line = 0.10
+
+[[passes]]
+shader = "halftone_cyber"
+enabled = true
+[passes.params]
+dot_scale = 80.0
+angle = 0.45
+contrast = 1.40
+blend = 0.85
+
+[[passes]]
+shader = "neon_edge"
+enabled = true
+[passes.params]
+edge_strength = 2.0
+base_mix = 0.50
+neon_color = [1.0, 0.8, 0.0]
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.50
+intensity = 1.15
+radius = 3.0
+
+[[passes]]
+shader = "crt_scanlines"
+enabled = true
+[passes.params]
+curvature = 0.12
+scanline_intensity = 0.25
+scanline_count = 340.0

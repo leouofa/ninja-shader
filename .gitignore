@@ -1,1 +1,4 @@
 /target
+/projects
+/output
+.DS_Store

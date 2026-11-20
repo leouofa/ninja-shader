@@ -1,0 +1,52 @@
+name = "arcade_16bit"
+description = "16-bit retro arcade cabinet monitor look with pixelation, duotone grading, and CRT curvature"
+input = "test_input.mp4"
+output = "output/arcade_16bit.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "pixelate"
+enabled = true
+[passes.params]
+pixel_size = 5.0
+color_levels = 12.0
+grid_line = 0.20
+
+[[passes]]
+shader = "duotone_cyber"
+enabled = true
+[passes.params]
+contrast = 1.2
+mix_amount = 0.60
+shadow_color = [0.08, 0.05, 0.22]
+highlight_color = [1.0, 0.45, 0.20]
+
+[[passes]]
+shader = "crt_scanlines"
+enabled = true
+[passes.params]
+curvature = 0.14
+scanline_intensity = 0.30
+scanline_count = 320.0
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.65
+intensity = 0.9
+radius = 2.5
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.75
+radius = 0.80
+softness = 0.35
+tint = [0.0, 0.0, 0.0]

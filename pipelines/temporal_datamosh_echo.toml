@@ -1,0 +1,52 @@
+name = "temporal_datamosh_echo"
+description = "Dual-feedback temporal fluid smearing with motion trails, cyber duotone grading, and halation"
+input = "test_input.mp4"
+output = "output/temporal_datamosh_echo.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "datamosh"
+enabled = true
+[passes.params]
+block_size = 12.0
+feedback = 0.85
+motion_offset = 0.030
+threshold = 0.16
+
+[[passes]]
+shader = "motion_trails"
+enabled = true
+[passes.params]
+decay = 0.40
+
+[[passes]]
+shader = "duotone_cyber"
+enabled = true
+[passes.params]
+contrast = 1.25
+mix_amount = 0.65
+shadow_color = [0.06, 0.02, 0.22]
+highlight_color = [1.0, 0.20, 0.70]
+
+[[passes]]
+shader = "halation"
+enabled = true
+[passes.params]
+threshold = 0.62
+radius = 4.5
+strength = 0.80
+tint = [1.0, 0.3, 0.1]
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.75
+radius = 0.78
+softness = 0.40
+tint = [0.0, 0.0, 0.0]

@@ -1,0 +1,50 @@
+name = "signal_jammed"
+description = "Heavy electronic warfare RF signal jamming with wave distortion, macroblocks, and analog jitter"
+input = "test_input.mp4"
+output = "output/signal_jammed.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "rgb_wave"
+enabled = true
+[passes.params]
+amplitude = 0.016
+frequency = 16.0
+speed = 5.0
+
+[[passes]]
+shader = "vhs_tracking"
+enabled = true
+[passes.params]
+bar_intensity = 0.70
+scroll_speed = 0.50
+head_switch_height = 0.08
+line_jitter = 0.015
+
+[[passes]]
+shader = "block_corrupt"
+enabled = true
+[passes.params]
+corruption_rate = 0.28
+grid_scale = 14.0
+color_crush = 3.0
+
+[[passes]]
+shader = "digital_glitch"
+enabled = true
+[passes.params]
+intensity = 0.45
+block_size = 16.0
+chroma_shift = 0.03
+
+[[passes]]
+shader = "film_grain"
+enabled = true
+[passes.params]
+intensity = 0.15
+size = 1.6

@@ -1,0 +1,51 @@
+name = "cyber_noir_rain"
+description = "Rain-soaked monochrome noir film look combined with red halation, digital rain glyphs, and bloom"
+input = "test_input.mp4"
+output = "output/cyber_noir_rain.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "grayscale"
+enabled = true
+[passes.params]
+strength = 0.92
+
+[[passes]]
+shader = "halation"
+enabled = true
+[passes.params]
+threshold = 0.60
+radius = 4.0
+strength = 0.90
+tint = [1.0, 0.20, 0.10]
+
+[[passes]]
+shader = "ascii_matrix"
+enabled = true
+[passes.params]
+cell_size = 10.0
+rain_speed = 1.8
+color_mix = 0.15
+glyph_color = [0.2, 0.8, 0.9]
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.50
+intensity = 1.2
+radius = 3.5
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.85
+radius = 0.72
+softness = 0.45
+tint = [0.01, 0.01, 0.02]

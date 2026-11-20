@@ -1,0 +1,37 @@
+name = "datamosh"
+description = "Macroblock motion-vector smearing and I-frame drop simulation using temporal feedback"
+author = "ninja-shader"
+language = "wgsl"
+source = "datamosh.wgsl"
+
+[[params]]
+name = "block_size"
+type = "float"
+default = 16.0
+min = 4.0
+max = 64.0
+description = "MPEG macroblock quantization pixel size"
+
+[[params]]
+name = "feedback"
+type = "float"
+default = 0.82
+min = 0.0
+max = 0.98
+description = "Persistence of previous frame pixel data"
+
+[[params]]
+name = "motion_offset"
+type = "float"
+default = 0.025
+min = 0.0
+max = 0.1
+description = "Displacement magnitude driven by luma gradients"
+
+[[params]]
+name = "threshold"
+type = "float"
+default = 0.18
+min = 0.01
+max = 0.8
+description = "Motion activity threshold to trigger smearing"

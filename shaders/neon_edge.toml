@@ -1,0 +1,35 @@
+name = "neon_edge"
+description = "3x3 Sobel gradient edge detection rendered as glowing neon contours"
+author = "ninja-shader"
+language = "wgsl"
+source = "neon_edge.wgsl"
+
+[[params]]
+name = "edge_strength"
+type = "float"
+default = 2.20
+min = 0.1
+max = 10.0
+description = "Edge line intensity multiplier"
+
+[[params]]
+name = "base_mix"
+type = "float"
+default = 0.35
+min = 0.0
+max = 1.0
+description = "Amount of underlying video preserved"
+
+[[params]]
+name = "pulse_speed"
+type = "float"
+default = 2.0
+min = 0.0
+max = 10.0
+description = "Neon emission pulsing speed"
+
+[[params]]
+name = "neon_color"
+type = "vec3"
+default = [0.0, 0.95, 1.0]
+description = "Neon glow contour color"

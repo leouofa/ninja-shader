@@ -1,0 +1,45 @@
+name = "cyber_halftone_press"
+description = "Cyberpunk graphic novel print look with LED dot-matrix halftone screen and neon edges"
+input = "test_input.mp4"
+output = "output/cyber_halftone_press.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "duotone_cyber"
+enabled = true
+[passes.params]
+contrast = 1.35
+mix_amount = 0.85
+shadow_color = [0.02, 0.05, 0.20]
+highlight_color = [0.95, 0.10, 0.55]
+
+[[passes]]
+shader = "halftone_cyber"
+enabled = true
+[passes.params]
+dot_scale = 110.0
+angle = 0.52
+contrast = 1.30
+blend = 0.80
+
+[[passes]]
+shader = "neon_edge"
+enabled = true
+[passes.params]
+edge_strength = 1.8
+base_mix = 0.70
+neon_color = [0.0, 1.0, 0.8]
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.80
+radius = 0.75
+softness = 0.45
+tint = [0.01, 0.01, 0.03]

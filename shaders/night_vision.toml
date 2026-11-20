@@ -1,0 +1,35 @@
+name = "night_vision"
+description = "Tactical Gen-3 phosphor green night-vision goggles with IR amplification and tube mask"
+author = "ninja-shader"
+language = "wgsl"
+source = "night_vision.wgsl"
+
+[[params]]
+name = "gain"
+type = "float"
+default = 1.80
+min = 0.5
+max = 4.0
+description = "Light amplification gain"
+
+[[params]]
+name = "noise_amount"
+type = "float"
+default = 0.12
+min = 0.0
+max = 0.5
+description = "Scintillation noise intensity"
+
+[[params]]
+name = "tube_vignette"
+type = "float"
+default = 0.70
+min = 0.0
+max = 1.0
+description = "Circular eyepiece mask intensity"
+
+[[params]]
+name = "phosphor_tint"
+type = "vec3"
+default = [0.15, 1.0, 0.25]
+description = "P-43 green phosphor emission tint"

@@ -1,0 +1,35 @@
+name = "ascii_matrix"
+description = "Procedural cellular glyph quantization with falling digital rain trails"
+author = "ninja-shader"
+language = "wgsl"
+source = "ascii_matrix.wgsl"
+
+[[params]]
+name = "cell_size"
+type = "float"
+default = 8.0
+min = 4.0
+max = 32.0
+description = "Width and height of character glyph cells in pixels"
+
+[[params]]
+name = "rain_speed"
+type = "float"
+default = 2.50
+min = 0.0
+max = 10.0
+description = "Downward digital rain flow speed"
+
+[[params]]
+name = "color_mix"
+type = "float"
+default = 0.25
+min = 0.0
+max = 1.0
+description = "Blend amount of original video color into glyphs"
+
+[[params]]
+name = "glyph_color"
+type = "vec3"
+default = [0.10, 1.0, 0.35]
+description = "Matrix phosphor green glyph color"

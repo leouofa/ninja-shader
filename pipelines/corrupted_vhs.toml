@@ -1,0 +1,51 @@
+name = "corrupted_vhs"
+description = "Degraded analog magnetic tape with horizontal chroma smearing, tracking bars, and RF jitter"
+input = "test_input.mp4"
+output = "output/corrupted_vhs.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "vhs_chroma_bleed"
+enabled = true
+[passes.params]
+bleed_distance = 0.015
+chroma_shift = 0.008
+saturation = 1.4
+
+[[passes]]
+shader = "vhs_tracking"
+enabled = true
+[passes.params]
+bar_intensity = 0.65
+scroll_speed = 0.40
+head_switch_height = 0.07
+line_jitter = 0.010
+
+[[passes]]
+shader = "rgb_wave"
+enabled = true
+[passes.params]
+amplitude = 0.006
+frequency = 8.0
+speed = 2.5
+
+[[passes]]
+shader = "film_grain"
+enabled = true
+[passes.params]
+intensity = 0.12
+size = 1.5
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.70
+radius = 0.80
+softness = 0.40
+tint = [0.02, 0.01, 0.02]

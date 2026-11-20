@@ -1,0 +1,51 @@
+name = "analog_broadcast_1984"
+description = "Warm 1980s NTSC television broadcast look with chroma bleed, phosphor scanlines, and halation"
+input = "test_input.mp4"
+output = "output/analog_broadcast_1984.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "vhs_chroma_bleed"
+enabled = true
+[passes.params]
+bleed_distance = 0.010
+chroma_shift = 0.006
+saturation = 1.30
+
+[[passes]]
+shader = "crt_scanlines"
+enabled = true
+[passes.params]
+curvature = 0.11
+scanline_intensity = 0.24
+scanline_count = 340.0
+
+[[passes]]
+shader = "halation"
+enabled = true
+[passes.params]
+threshold = 0.65
+radius = 3.5
+strength = 0.65
+tint = [1.0, 0.30, 0.15]
+
+[[passes]]
+shader = "film_grain"
+enabled = true
+[passes.params]
+intensity = 0.09
+size = 1.1
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.65
+radius = 0.82
+softness = 0.35
+tint = [0.0, 0.0, 0.0]

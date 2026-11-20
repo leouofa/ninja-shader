@@ -1,0 +1,37 @@
+name = "kaleido_prism"
+description = "Radial N-fold mirror symmetry prism distortion with continuous rotation and zoom"
+author = "ninja-shader"
+language = "wgsl"
+source = "kaleido_prism.wgsl"
+
+[[params]]
+name = "segments"
+type = "float"
+default = 6.0
+min = 2.0
+max = 16.0
+description = "Number of rotational reflection segments"
+
+[[params]]
+name = "rotation_speed"
+type = "float"
+default = 0.30
+min = 0.0
+max = 3.0
+description = "Kaleidoscope spin speed"
+
+[[params]]
+name = "zoom"
+type = "float"
+default = 1.0
+min = 0.2
+max = 4.0
+description = "Field of view zoom factor"
+
+[[params]]
+name = "mix_amount"
+type = "float"
+default = 1.0
+min = 0.0
+max = 1.0
+description = "Prism effect blend amount"

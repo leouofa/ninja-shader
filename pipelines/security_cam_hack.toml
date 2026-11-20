@@ -1,0 +1,52 @@
+name = "security_cam_hack"
+description = "Intercepted CCTV night-vision security camera feed with digital glitches, tracking jitter, and CRT"
+input = "test_input.mp4"
+output = "output/security_cam_hack.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "night_vision"
+enabled = true
+[passes.params]
+gain = 1.7
+noise_amount = 0.15
+tube_vignette = 0.50
+phosphor_tint = [0.2, 0.9, 0.3]
+
+[[passes]]
+shader = "digital_glitch"
+enabled = true
+[passes.params]
+intensity = 0.25
+block_size = 28.0
+chroma_shift = 0.015
+
+[[passes]]
+shader = "vhs_tracking"
+enabled = true
+[passes.params]
+bar_intensity = 0.45
+scroll_speed = 0.30
+head_switch_height = 0.05
+line_jitter = 0.006
+
+[[passes]]
+shader = "pixelate"
+enabled = true
+[passes.params]
+pixel_size = 3.0
+color_levels = 32.0
+grid_line = 0.0
+
+[[passes]]
+shader = "crt_scanlines"
+enabled = true
+[passes.params]
+curvature = 0.07
+scanline_intensity = 0.25
+scanline_count = 380.0

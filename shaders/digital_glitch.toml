@@ -1,0 +1,37 @@
+name = "digital_glitch"
+description = "Horizontal scan-band tearing, pseudo-random slice displacement, and chromatic shift"
+author = "ninja-shader"
+language = "wgsl"
+source = "digital_glitch.wgsl"
+
+[[params]]
+name = "intensity"
+type = "float"
+default = 0.35
+min = 0.0
+max = 1.0
+description = "Glitch frequency and displacement magnitude"
+
+[[params]]
+name = "block_size"
+type = "float"
+default = 24.0
+min = 4.0
+max = 128.0
+description = "Vertical slice slice band height"
+
+[[params]]
+name = "speed"
+type = "float"
+default = 10.0
+min = 0.1
+max = 30.0
+description = "Temporal noise evolution speed"
+
+[[params]]
+name = "chroma_shift"
+type = "float"
+default = 0.02
+min = 0.0
+max = 0.1
+description = "RGB chromatic displacement magnitude"

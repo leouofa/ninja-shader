@@ -1,0 +1,37 @@
+name = "block_corrupt"
+description = "MPEG macroblock corruption with UV swapping, bit-crushing, and inversion"
+author = "ninja-shader"
+language = "wgsl"
+source = "block_corrupt.wgsl"
+
+[[params]]
+name = "corruption_rate"
+type = "float"
+default = 0.22
+min = 0.0
+max = 1.0
+description = "Probability of block corruption"
+
+[[params]]
+name = "grid_scale"
+type = "float"
+default = 20.0
+min = 4.0
+max = 80.0
+description = "Number of block divisions across the screen"
+
+[[params]]
+name = "color_crush"
+type = "float"
+default = 4.0
+min = 1.0
+max = 16.0
+description = "Color quantization level in corrupted blocks"
+
+[[params]]
+name = "speed"
+type = "float"
+default = 8.0
+min = 0.1
+max = 24.0
+description = "Glitch permutation speed"
