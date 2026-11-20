@@ -5,7 +5,7 @@ use ninja_shader::gpu::{resolve_shader_manifest, GpuEngine};
 use indicatif::{ProgressBar, ProgressStyle};
 use ninja_shader::manifest::{ShaderLanguage, ShaderManifest};
 use ninja_shader::pipeline_config::PipelineConfig;
-use ninja_shader::preview;
+use ninja_shader::{gui, preview};
 use ninja_shader::video::{VideoDecoder, VideoEncoder, VideoProbe};
 use std::path::{Path, PathBuf};
 
@@ -20,6 +20,7 @@ fn main() -> Result<()> {
         Commands::Inspect(inspect_args) => handle_inspect(inspect_args, &shaders_dir)?,
         Commands::New(new_args) => handle_new(new_args, &shaders_dir)?,
         Commands::Validate(val_args) => handle_validate(val_args, &shaders_dir)?,
+        Commands::Gui(gui_args) => gui::run_gui(gui_args, shaders_dir)?,
     }
 
     Ok(())

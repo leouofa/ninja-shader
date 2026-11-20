@@ -71,8 +71,28 @@ The compiled binary will be located at `./target/release/ninja-shader`.
 
 ## CLI Usage
 
-### 1. Render Video Pipeline
-Process an entire video file through a pipeline recipe:
+### 1. Studio GUI (Live Previewer & Renderer)
+Launch the native desktop studio interface:
+
+```bash
+ninja-shader gui
+```
+
+Or pre-populate an input video, output directory, or pipeline:
+
+```bash
+ninja-shader gui -i input.mp4 -o output/ -p pipelines/retro_crt.toml
+```
+
+**Studio GUI Features:**
+- **File Picker**: Native macOS/OS open dialog to pick any video file (`mp4`, `mov`, `mkv`, `avi`, `webm`).
+- **Output Directory**: Native OS directory picker to configure the output render directory.
+- **Pipeline Browser & Keyboard Navigation**: Live searchable list of all 30+ pipeline recipes; press **`↑` / `↓` arrow keys** to effortlessly step through and hot-swap shaders live on the playing video.
+- **Pass Parameter Sliders**: Tweak live shader uniform parameters (floats, ints, colors) and watch immediate visual results.
+- **Background Rendering**: Render full videos with real-time animated progress bar, percentage, FPS, and cancellation support without freezing playback.
+- **Playback Bar**: Play/pause, seek scrubber, restart, and loop controls.
+
+### 2. Render Video Pipeline (CLI)
 
 ```bash
 ninja-shader render --pipeline pipelines/retro_crt.toml -i input.mp4 -o output.mp4
