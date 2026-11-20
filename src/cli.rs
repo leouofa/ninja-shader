@@ -24,6 +24,9 @@ pub enum Commands {
     /// Live preview window with hot-reloading shaders and pipeline config
     Preview(PreviewArgs),
 
+    /// Native desktop GUI for previewing pipelines and rendering videos
+    Gui(GuiArgs),
+
     /// List all discovered shaders in the shader library
     List,
 
@@ -83,6 +86,29 @@ pub struct PreviewArgs {
     pub input: Option<PathBuf>,
 
     /// Resolution scale multiplier for preview window
+    #[arg(long)]
+    pub scale: Option<f32>,
+}
+
+#[derive(Args, Debug)]
+pub struct GuiArgs {
+    /// Optional initial pipeline recipe TOML
+    #[arg(short, long)]
+    pub pipeline: Option<PathBuf>,
+
+    /// Optional initial input video file
+    #[arg(short, long)]
+    pub input: Option<PathBuf>,
+
+    /// Optional default output directory
+    #[arg(short, long)]
+    pub output_dir: Option<PathBuf>,
+
+    /// Directory containing pipeline recipes
+    #[arg(long, default_value = "pipelines")]
+    pub pipelines_dir: PathBuf,
+
+    /// Resolution scale multiplier for preview
     #[arg(long)]
     pub scale: Option<f32>,
 }
