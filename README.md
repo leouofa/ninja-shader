@@ -157,8 +157,45 @@ Every fragment shader receives:
 
 ---
 
-## Included Starter Shaders
+## Included Shader Library (28 Shaders)
 
+### 1. Cyberpunk, Glitch & Datamosh
+| Shader | Language | Features |
+| :--- | :---: | :--- |
+| `digital_glitch` | WGSL | Scan-band tearing, random slice displacement, and RGB chroma shifts |
+| `datamosh` | WGSL | Macroblock motion-vector smearing and I-frame drop via `prev_frame_tex` |
+| `pixel_sort` | WGSL | Directional luminance threshold pixel sorting and streak smearing |
+| `rgb_wave` | WGSL | Sinusoidal and sawtooth horizontal wave distortion with phase-offset RGB |
+| `block_corrupt` | WGSL | MPEG macroblock corruption with UV swapping, bit-crushing, and inversion |
+
+### 2. Neon & Synthwave
+| Shader | Language | Features |
+| :--- | :---: | :--- |
+| `bloom` | WGSL | Bright-pass extraction and dual-ring Gaussian glow diffusion |
+| `neon_edge` | WGSL | 3x3 Sobel gradient edge detection rendered as pulsing neon contours |
+| `synthwave_grid` | WGSL | Outrun perspective scrolling laser floor grid and horizon haze |
+| `duotone_cyber` | WGSL | Cyberpunk split-toning mapping shadows & highlights across neon palettes |
+| `halation` | WGSL | Red-orange film emulsion halation scatter around high-contrast edges |
+
+### 3. Sci-Fi HUD & Hologram
+| Shader | Language | Features |
+| :--- | :---: | :--- |
+| `hologram` | WGSL | Volumetric hologram with interference lines, rolling sync bar, and flicker |
+| `night_vision` | WGSL | Tactical Gen-3 green phosphor goggles with IR amplification and tube mask |
+| `thermal_infrared` | WGSL | FLIR false-color thermal heat imaging with ironbow gradients & isotherms |
+| `radar_hud` | WGSL | Tactical visor HUD with rotating radar sweep, reticles, and corner framing |
+| `vhs_tracking` | WGSL | Analog VHS tape tracking error bars, head-switching noise, and line jitter |
+
+### 4. Cyber Stylization & Analog
+| Shader | Language | Features |
+| :--- | :---: | :--- |
+| `ascii_matrix` | WGSL | Procedural cellular glyph quantization with falling digital rain trails |
+| `pixelate` | WGSL | Aspect-aware pixel grid quantization with optional color bit-depth crushing |
+| `halftone_cyber` | WGSL | Rotated CMYK / Neon LED dot-matrix halftone screen pattern |
+| `kaleido_prism` | WGSL | Radial N-fold mirror symmetry prism distortion with continuous rotation |
+| `vhs_chroma_bleed` | WGSL | YIQ/YUV luma-chroma separation with low-pass horizontal chrominance smearing |
+
+### 5. Starter Utility & Cinema Shaders
 | Shader | Language | Features |
 | :--- | :---: | :--- |
 | `grayscale` | WGSL | Rec. 709 luminance desaturation with `strength` parameter |
@@ -169,6 +206,47 @@ Every fragment shader receives:
 | `motion_trails` | WGSL | Phosphor decay and ghosting using `prev_frame_tex` feedback |
 | `texture_overlay` | WGSL | External image/pattern texture blending with `opacity` and `uv_scale` |
 | `sepia` | WGSL | Warm vintage tint adjustment |
+
+---
+
+## Included Pipeline Recipes (32 Recipes)
+
+`ninja-shader` includes 32 production-ready recipes in `pipelines/`:
+
+1. `cyber_runner.toml` (5 passes: `duotone_cyber` → `halation` → `bloom` → `film_grain` → `vignette`)
+2. `ghost_hologram.toml` (5 passes: `hologram` → `neon_edge` → `rgb_wave` → `bloom` → `crt_scanlines`)
+3. `datamosh_breakdown.toml` (4 passes: `datamosh` → `block_corrupt` → `digital_glitch` → `chromatic_aberration`)
+4. `synthwave_outrun.toml` (5 passes: `duotone_cyber` → `synthwave_grid` → `bloom` → `crt_scanlines` → `vignette`)
+5. `matrix_terminal.toml` (5 passes: `ascii_matrix` → `bloom` → `crt_scanlines` → `motion_trails` → `vignette`)
+6. `predator_thermal.toml` (4 passes: `thermal_infrared` → `radar_hud` → `crt_scanlines` → `chromatic_aberration`)
+7. `tactical_nvg.toml` (5 passes: `night_vision` → `radar_hud` → `bloom` → `film_grain` → `vignette`)
+8. `corrupted_vhs.toml` (5 passes: `vhs_chroma_bleed` → `vhs_tracking` → `rgb_wave` → `film_grain` → `vignette`)
+9. `pixel_sort_meltdown.toml` (4 passes: `pixel_sort` → `duotone_cyber` → `bloom` → `chromatic_aberration`)
+10. `neon_wireframe.toml` (4 passes: `neon_edge` → `bloom` → `motion_trails` → `vignette`)
+11. `arcade_16bit.toml` (5 passes: `pixelate` → `duotone_cyber` → `crt_scanlines` → `bloom` → `vignette`)
+12. `cyber_halftone_press.toml` (4 passes: `duotone_cyber` → `halftone_cyber` → `neon_edge` → `vignette`)
+13. `kaleido_cyber_trip.toml` (5 passes: `kaleido_prism` → `duotone_cyber` → `neon_edge` → `bloom` → `chromatic_aberration`)
+14. `drone_recon_hud.toml` (5 passes: `grayscale` → `neon_edge` → `radar_hud` → `vhs_tracking` → `crt_scanlines`)
+15. `neural_overload.toml` (6 passes: `rgb_wave` → `pixel_sort` → `digital_glitch` → `neon_edge` → `bloom` → `vignette`)
+16. `analog_broadcast_1984.toml` (5 passes: `vhs_chroma_bleed` → `crt_scanlines` → `halation` → `film_grain` → `vignette`)
+17. `holodeck_malfunction.toml` (5 passes: `hologram` → `block_corrupt` → `digital_glitch` → `synthwave_grid` → `bloom`)
+18. `infrared_sat_link.toml` (5 passes: `thermal_infrared` → `pixelate` → `radar_hud` → `vhs_tracking` → `vignette`)
+19. `cyber_noir_rain.toml` (5 passes: `grayscale` → `halation` → `ascii_matrix` → `bloom` → `vignette`)
+20. `glitch_art_gallery.toml` (4 passes: `pixel_sort` → `block_corrupt` → `rgb_wave` → `halftone_cyber`)
+21. `vhs_cyber_dub.toml` (5 passes: `duotone_cyber` → `vhs_chroma_bleed` → `vhs_tracking` → `motion_trails` → `crt_scanlines`)
+22. `laser_grid_visor.toml` (5 passes: `synthwave_grid` → `neon_edge` → `radar_hud` → `bloom` → `chromatic_aberration`)
+23. `deep_net_dive.toml` (5 passes: `ascii_matrix` → `kaleido_prism` → `neon_edge` → `bloom` → `motion_trails`)
+24. `security_cam_hack.toml` (5 passes: `night_vision` → `digital_glitch` → `vhs_tracking` → `pixelate` → `crt_scanlines`)
+25. `chroma_prism_dream.toml` (5 passes: `kaleido_prism` → `halation` → `bloom` → `chromatic_aberration` → `motion_trails`)
+26. `signal_jammed.toml` (5 passes: `rgb_wave` → `vhs_tracking` → `block_corrupt` → `digital_glitch` → `film_grain`)
+27. `neon_halftone_arcade.toml` (5 passes: `pixelate` → `halftone_cyber` → `neon_edge` → `bloom` → `crt_scanlines`)
+28. `bio_scanner_xray.toml` (5 passes: `grayscale` → `neon_edge` → `hologram` → `radar_hud` → `bloom`)
+29. `temporal_datamosh_echo.toml` (5 passes: `datamosh` → `motion_trails` → `duotone_cyber` → `halation` → `vignette`)
+30. `ultimate_cyberpunk.toml` (6 passes: `duotone_cyber` → `neon_edge` → `hologram` → `digital_glitch` → `bloom` → `vignette`)
+31. `retro_crt.toml` (5 passes: `chromatic_aberration` → `crt_scanlines` → `motion_trails` → `film_grain` → `vignette`)
+32. `noir_film.toml` (4 passes: `grayscale` → `texture_overlay` → `film_grain` → `vignette`)
+
+---
 
 ---
 

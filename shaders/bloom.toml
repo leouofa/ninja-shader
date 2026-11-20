@@ -1,0 +1,37 @@
+name = "bloom"
+description = "Bright-pass extraction and dual-ring Gaussian glow diffusion for neon highlights"
+author = "ninja-shader"
+language = "wgsl"
+source = "bloom.wgsl"
+
+[[params]]
+name = "threshold"
+type = "float"
+default = 0.60
+min = 0.0
+max = 1.0
+description = "Luminance cutoff threshold for bloom extraction"
+
+[[params]]
+name = "intensity"
+type = "float"
+default = 1.10
+min = 0.0
+max = 5.0
+description = "Bloom glow brightness multiplier"
+
+[[params]]
+name = "radius"
+type = "float"
+default = 3.5
+min = 0.5
+max = 10.0
+description = "Blur kernel sampling radius in pixels"
+
+[[params]]
+name = "soft_knee"
+type = "float"
+default = 0.20
+min = 0.01
+max = 0.5
+description = "Threshold transition softness"

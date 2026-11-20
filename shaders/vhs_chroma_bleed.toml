@@ -1,0 +1,29 @@
+name = "vhs_chroma_bleed"
+description = "YIQ / YUV luma-chroma separation with low-pass horizontal chrominance smearing"
+author = "ninja-shader"
+language = "wgsl"
+source = "vhs_chroma_bleed.wgsl"
+
+[[params]]
+name = "bleed_distance"
+type = "float"
+default = 0.012
+min = 0.0
+max = 0.05
+description = "Horizontal chroma blur radius"
+
+[[params]]
+name = "chroma_shift"
+type = "float"
+default = 0.005
+min = -0.03
+max = 0.03
+description = "Horizontal chroma subcarrier phase delay"
+
+[[params]]
+name = "saturation"
+type = "float"
+default = 1.35
+min = 0.0
+max = 3.0
+description = "Analog chroma saturation boost"

@@ -1,0 +1,50 @@
+name = "vhs_cyber_dub"
+description = "Bootleg 2099 cyberpunk VHS dub tape with phosphor ghosting, chroma smear, and CRT scanlines"
+input = "test_input.mp4"
+output = "output/vhs_cyber_dub.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "duotone_cyber"
+enabled = true
+[passes.params]
+contrast = 1.2
+mix_amount = 0.55
+shadow_color = [0.05, 0.02, 0.18]
+highlight_color = [1.0, 0.25, 0.65]
+
+[[passes]]
+shader = "vhs_chroma_bleed"
+enabled = true
+[passes.params]
+bleed_distance = 0.012
+chroma_shift = 0.005
+saturation = 1.25
+
+[[passes]]
+shader = "vhs_tracking"
+enabled = true
+[passes.params]
+bar_intensity = 0.45
+scroll_speed = 0.30
+head_switch_height = 0.05
+line_jitter = 0.007
+
+[[passes]]
+shader = "motion_trails"
+enabled = true
+[passes.params]
+decay = 0.30
+
+[[passes]]
+shader = "crt_scanlines"
+enabled = true
+[passes.params]
+curvature = 0.09
+scanline_intensity = 0.22
+scanline_count = 350.0

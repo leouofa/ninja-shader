@@ -1,0 +1,35 @@
+name = "hologram"
+description = "Volumetric holographic projection with interference lines, rolling sync bar, and flicker"
+author = "ninja-shader"
+language = "wgsl"
+source = "hologram.wgsl"
+
+[[params]]
+name = "scanline_density"
+type = "float"
+default = 240.0
+min = 50.0
+max = 600.0
+description = "Holographic interference line density"
+
+[[params]]
+name = "flicker_speed"
+type = "float"
+default = 12.0
+min = 0.0
+max = 40.0
+description = "Interference flicker rate"
+
+[[params]]
+name = "jitter"
+type = "float"
+default = 0.004
+min = 0.0
+max = 0.05
+description = "Horizontal hologram sync jitter"
+
+[[params]]
+name = "tint"
+type = "vec3"
+default = [0.10, 0.85, 1.0]
+description = "Holographic cyan/blue phosphor emission color"

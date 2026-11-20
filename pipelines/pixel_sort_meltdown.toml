@@ -1,0 +1,42 @@
+name = "pixel_sort_meltdown"
+description = "Vertical luminance waterfall pixel sorting with duotone neon coloring and chromatic aberration"
+input = "test_input.mp4"
+output = "output/pixel_sort_meltdown.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "pixel_sort"
+enabled = true
+[passes.params]
+threshold_low = 0.20
+threshold_high = 0.85
+span_length = 0.16
+direction = 0.0
+
+[[passes]]
+shader = "duotone_cyber"
+enabled = true
+[passes.params]
+contrast = 1.30
+mix_amount = 0.70
+shadow_color = [0.05, 0.02, 0.20]
+highlight_color = [1.0, 0.30, 0.80]
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.50
+intensity = 1.3
+radius = 4.0
+
+[[passes]]
+shader = "chromatic_aberration"
+enabled = true
+[passes.params]
+amount = 0.010

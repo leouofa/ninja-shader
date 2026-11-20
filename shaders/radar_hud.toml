@@ -1,0 +1,35 @@
+name = "radar_hud"
+description = "Sci-Fi tactical visor HUD with rotating radar sweep, reticles, and corner framing"
+author = "ninja-shader"
+language = "wgsl"
+source = "radar_hud.wgsl"
+
+[[params]]
+name = "sweep_speed"
+type = "float"
+default = 1.80
+min = 0.0
+max = 10.0
+description = "Angular radar sweep rotation speed"
+
+[[params]]
+name = "reticle_scale"
+type = "float"
+default = 0.38
+min = 0.1
+max = 1.0
+description = "Targeting reticle radius scale"
+
+[[params]]
+name = "hud_opacity"
+type = "float"
+default = 0.65
+min = 0.0
+max = 1.0
+description = "HUD graphics overlay opacity"
+
+[[params]]
+name = "hud_color"
+type = "vec3"
+default = [0.0, 1.0, 0.75]
+description = "HUD graphic element color (cyan/teal)"

@@ -1,0 +1,50 @@
+name = "drone_recon_hud"
+description = "FPV aerial reconnaissance drone feed with telemetry HUD, monochrome feed, and RF breakup"
+input = "test_input.mp4"
+output = "output/drone_recon_hud.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "grayscale"
+enabled = true
+[passes.params]
+strength = 0.85
+
+[[passes]]
+shader = "neon_edge"
+enabled = true
+[passes.params]
+edge_strength = 1.6
+base_mix = 0.65
+neon_color = [0.2, 0.9, 0.4]
+
+[[passes]]
+shader = "radar_hud"
+enabled = true
+[passes.params]
+sweep_speed = 1.2
+reticle_scale = 0.32
+hud_opacity = 0.80
+hud_color = [0.1, 1.0, 0.4]
+
+[[passes]]
+shader = "vhs_tracking"
+enabled = true
+[passes.params]
+bar_intensity = 0.40
+scroll_speed = 0.25
+head_switch_height = 0.04
+line_jitter = 0.005
+
+[[passes]]
+shader = "crt_scanlines"
+enabled = true
+[passes.params]
+curvature = 0.06
+scanline_intensity = 0.20
+scanline_count = 400.0

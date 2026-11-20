@@ -1,0 +1,42 @@
+name = "neon_wireframe"
+description = "High-contrast glowing cybernetic Sobel wireframe contours with phosphor motion trails"
+input = "test_input.mp4"
+output = "output/neon_wireframe.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "neon_edge"
+enabled = true
+[passes.params]
+edge_strength = 3.0
+base_mix = 0.15
+pulse_speed = 3.0
+neon_color = [0.0, 0.95, 1.0]
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.35
+intensity = 1.5
+radius = 4.5
+
+[[passes]]
+shader = "motion_trails"
+enabled = true
+[passes.params]
+decay = 0.45
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.80
+radius = 0.70
+softness = 0.40
+tint = [0.0, 0.0, 0.0]

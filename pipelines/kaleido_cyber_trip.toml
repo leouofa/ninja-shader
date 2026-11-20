@@ -1,0 +1,50 @@
+name = "kaleido_cyber_trip"
+description = "Psychedelic 6-fold holographic prism kaleidoscope with glowing edges and chromatic dispersion"
+input = "test_input.mp4"
+output = "output/kaleido_cyber_trip.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "kaleido_prism"
+enabled = true
+[passes.params]
+segments = 6.0
+rotation_speed = 0.25
+zoom = 1.2
+mix_amount = 1.0
+
+[[passes]]
+shader = "duotone_cyber"
+enabled = true
+[passes.params]
+contrast = 1.25
+mix_amount = 0.65
+shadow_color = [0.08, 0.02, 0.30]
+highlight_color = [0.0, 1.0, 0.85]
+
+[[passes]]
+shader = "neon_edge"
+enabled = true
+[passes.params]
+edge_strength = 2.0
+base_mix = 0.60
+neon_color = [1.0, 0.1, 0.6]
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.50
+intensity = 1.20
+radius = 3.5
+
+[[passes]]
+shader = "chromatic_aberration"
+enabled = true
+[passes.params]
+amount = 0.012

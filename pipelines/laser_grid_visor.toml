@@ -1,0 +1,51 @@
+name = "laser_grid_visor"
+description = "Augmented reality combat visor with synthwave ground grid, edge target lock, and chromatic shift"
+input = "test_input.mp4"
+output = "output/laser_grid_visor.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "synthwave_grid"
+enabled = true
+[passes.params]
+horizon = 0.36
+scroll_speed = 2.0
+grid_density = 20.0
+opacity = 0.70
+grid_color = [0.0, 1.0, 0.8]
+
+[[passes]]
+shader = "neon_edge"
+enabled = true
+[passes.params]
+edge_strength = 2.2
+base_mix = 0.50
+neon_color = [1.0, 0.1, 0.5]
+
+[[passes]]
+shader = "radar_hud"
+enabled = true
+[passes.params]
+sweep_speed = 1.8
+reticle_scale = 0.36
+hud_opacity = 0.75
+hud_color = [0.0, 1.0, 0.8]
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.45
+intensity = 1.2
+radius = 3.5
+
+[[passes]]
+shader = "chromatic_aberration"
+enabled = true
+[passes.params]
+amount = 0.008

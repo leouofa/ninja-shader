@@ -1,0 +1,63 @@
+name = "ultimate_cyberpunk"
+description = "6-pass flagship showcase combining duotone, neon edges, hologram, glitch, bloom, and vignette"
+input = "test_input.mp4"
+output = "output/ultimate_cyberpunk.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "duotone_cyber"
+enabled = true
+[passes.params]
+contrast = 1.30
+mix_amount = 0.75
+shadow_color = [0.03, 0.05, 0.25]
+highlight_color = [1.0, 0.15, 0.65]
+
+[[passes]]
+shader = "neon_edge"
+enabled = true
+[passes.params]
+edge_strength = 2.2
+base_mix = 0.60
+pulse_speed = 2.5
+neon_color = [0.0, 0.95, 1.0]
+
+[[passes]]
+shader = "hologram"
+enabled = true
+[passes.params]
+scanline_density = 220.0
+flicker_speed = 10.0
+jitter = 0.003
+tint = [0.15, 0.90, 1.0]
+
+[[passes]]
+shader = "digital_glitch"
+enabled = true
+[passes.params]
+intensity = 0.25
+block_size = 24.0
+speed = 8.0
+chroma_shift = 0.015
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.50
+intensity = 1.30
+radius = 3.8
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.80
+radius = 0.75
+softness = 0.42
+tint = [0.01, 0.02, 0.05]

@@ -1,0 +1,41 @@
+name = "datamosh_breakdown"
+description = "Severe video codec I-frame collapse, macroblock corruption, and chromatic aberration"
+input = "test_input.mp4"
+output = "output/datamosh_breakdown.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "datamosh"
+enabled = true
+[passes.params]
+block_size = 16.0
+feedback = 0.88
+motion_offset = 0.035
+threshold = 0.15
+
+[[passes]]
+shader = "block_corrupt"
+enabled = true
+[passes.params]
+corruption_rate = 0.25
+grid_scale = 18.0
+color_crush = 4.0
+
+[[passes]]
+shader = "digital_glitch"
+enabled = true
+[passes.params]
+intensity = 0.40
+block_size = 20.0
+chroma_shift = 0.025
+
+[[passes]]
+shader = "chromatic_aberration"
+enabled = true
+[passes.params]
+amount = 0.012

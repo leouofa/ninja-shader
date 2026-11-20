@@ -25,8 +25,8 @@ fn test_discover_and_parse_all_starter_shaders() {
     }
 
     assert!(
-        shader_names.len() >= 7,
-        "Expected at least 7 starter shaders, found {}",
+        shader_names.len() >= 28,
+        "Expected at least 28 shaders, found {}",
         shader_names.len()
     );
 }
@@ -147,65 +147,69 @@ fn test_single_pass_glsl_chromatic_aberration() {
 }
 
 #[test]
-fn test_retro_crt_pipeline_compiles_and_renders() {
-    let pipeline = PipelineConfig::load_from_file("pipelines/retro_crt.toml")
-        .expect("Failed to load retro_crt.toml");
+fn test_all_pipelines_compile_and_render_headless() {
+    let pipelines_dir = PathBuf::from("pipelines");
+    assert!(pipelines_dir.exists(), "pipelines/ directory must exist");
     let shader_dirs = vec![PathBuf::from("shaders")];
 
-    let width = 64u32;
-    let height = 64u32;
+    let mut pipeline_paths = Vec::new();
+    for entry in std::fs::read_dir(&pipelines_dir).unwrap() {
+        let entry = entry.unwrap();
+        let path = entry.path();
+        if path.extension().map_or(false, |e| e == "toml") {
+            pipeline_paths.push(path);
+        }
+    }
+    pipeline_paths.sort();
 
-    let engine = pollster::block_on(GpuEngine::new_headless(
-        width,
-        height,
-        &pipeline,
-        &shader_dirs,
-    ))
-    .expect("Failed to build GpuEngine for retro_crt pipeline");
+    assert!(
+        pipeline_paths.len() >= 32,
+        "Expected at least 32 pipelines, found {}",
+        pipeline_paths.len()
+    );
 
+    let width = 32u32;
+    let height = 32u32;
     let frame_rgba = vec![128u8; (width * height * 4) as usize];
-    engine.upload_source_frame(&frame_rgba);
-    engine.update_globals(0, 30.0);
 
-    let mut encoder = engine.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-        label: Some("test_encoder"),
-    });
-    let final_tex = engine.render_frame(&mut encoder);
-    engine.queue.submit(Some(encoder.finish()));
+    for pipeline_path in &pipeline_paths {
+        let pipeline = PipelineConfig::load_from_file(pipeline_path)
+            .unwrap_or_else(|e| panic!("Failed to load {:?}: {:?}", pipeline_path, e));
 
-    let mut out_rgba = Vec::new();
-    engine.readback_frame(final_tex, &mut out_rgba).expect("Readback failed");
-    assert_eq!(out_rgba.len(), (width * height * 4) as usize);
-}
+        let engine = pollster::block_on(GpuEngine::new_headless(
+            width,
+            height,
+            &pipeline,
+            &shader_dirs,
+        ))
+        .unwrap_or_else(|e| panic!("Failed to build GpuEngine for {:?}: {:?}", pipeline_path, e));
 
-#[test]
-fn test_noir_film_pipeline_compiles_and_renders() {
-    let pipeline = PipelineConfig::load_from_file("pipelines/noir_film.toml")
-        .expect("Failed to load noir_film.toml");
-    let shader_dirs = vec![PathBuf::from("shaders")];
+        // Test frame 0
+        engine.upload_source_frame(&frame_rgba);
+        engine.update_globals(0, 30.0);
+        let mut encoder0 = engine.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("test_encoder_frame0"),
+        });
+        let final_tex0 = engine.render_frame(&mut encoder0);
+        engine.queue.submit(Some(encoder0.finish()));
 
-    let width = 64u32;
-    let height = 64u32;
+        let mut out0 = Vec::new();
+        engine.readback_frame(final_tex0, &mut out0)
+            .unwrap_or_else(|e| panic!("Readback failed on frame 0 for {:?}: {:?}", pipeline_path, e));
+        assert_eq!(out0.len(), (width * height * 4) as usize);
 
-    let engine = pollster::block_on(GpuEngine::new_headless(
-        width,
-        height,
-        &pipeline,
-        &shader_dirs,
-    ))
-    .expect("Failed to build GpuEngine for noir_film pipeline");
+        // Test frame 1 (exercises temporal feedback e.g. datamosh, motion_trails)
+        engine.upload_source_frame(&frame_rgba);
+        engine.update_globals(1, 30.0);
+        let mut encoder1 = engine.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
+            label: Some("test_encoder_frame1"),
+        });
+        let final_tex1 = engine.render_frame(&mut encoder1);
+        engine.queue.submit(Some(encoder1.finish()));
 
-    let frame_rgba = vec![200u8; (width * height * 4) as usize];
-    engine.upload_source_frame(&frame_rgba);
-    engine.update_globals(0, 30.0);
-
-    let mut encoder = engine.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-        label: Some("test_encoder"),
-    });
-    let final_tex = engine.render_frame(&mut encoder);
-    engine.queue.submit(Some(encoder.finish()));
-
-    let mut out_rgba = Vec::new();
-    engine.readback_frame(final_tex, &mut out_rgba).expect("Readback failed");
-    assert_eq!(out_rgba.len(), (width * height * 4) as usize);
+        let mut out1 = Vec::new();
+        engine.readback_frame(final_tex1, &mut out1)
+            .unwrap_or_else(|e| panic!("Readback failed on frame 1 for {:?}: {:?}", pipeline_path, e));
+        assert_eq!(out1.len(), (width * height * 4) as usize);
+    }
 }

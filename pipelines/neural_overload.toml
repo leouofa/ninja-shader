@@ -1,0 +1,60 @@
+name = "neural_overload"
+description = "6-pass intense cyberpsycho sensory overload with wave distortion, pixel sorting, glitch, and neon glow"
+input = "test_input.mp4"
+output = "output/neural_overload.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "rgb_wave"
+enabled = true
+[passes.params]
+amplitude = 0.012
+frequency = 14.0
+speed = 4.0
+
+[[passes]]
+shader = "pixel_sort"
+enabled = true
+[passes.params]
+threshold_low = 0.25
+threshold_high = 0.80
+span_length = 0.14
+direction = 1.0
+
+[[passes]]
+shader = "digital_glitch"
+enabled = true
+[passes.params]
+intensity = 0.35
+block_size = 18.0
+chroma_shift = 0.02
+
+[[passes]]
+shader = "neon_edge"
+enabled = true
+[passes.params]
+edge_strength = 2.4
+base_mix = 0.45
+neon_color = [1.0, 0.05, 0.5]
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.40
+intensity = 1.4
+radius = 4.0
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.85
+radius = 0.70
+softness = 0.45
+tint = [0.08, 0.0, 0.04]

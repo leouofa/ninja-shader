@@ -1,0 +1,37 @@
+name = "pixel_sort"
+description = "Directional luminance threshold pixel sorting and streak smearing"
+author = "ninja-shader"
+language = "wgsl"
+source = "pixel_sort.wgsl"
+
+[[params]]
+name = "threshold_low"
+type = "float"
+default = 0.25
+min = 0.0
+max = 1.0
+description = "Lower luminance bound to activate sorting"
+
+[[params]]
+name = "threshold_high"
+type = "float"
+default = 0.85
+min = 0.0
+max = 1.0
+description = "Upper luminance bound to activate sorting"
+
+[[params]]
+name = "span_length"
+type = "float"
+default = 0.12
+min = 0.01
+max = 0.4
+description = "Max sorting streak length"
+
+[[params]]
+name = "direction"
+type = "float"
+default = 0.0
+min = 0.0
+max = 1.0
+description = "0.0 for vertical streaks, 1.0 for horizontal streaks"

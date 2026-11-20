@@ -1,0 +1,44 @@
+name = "glitch_art_gallery"
+description = "Contemporary databend gallery print aesthetic: pixel sorting, block displacement, and dot screen"
+input = "test_input.mp4"
+output = "output/glitch_art_gallery.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "pixel_sort"
+enabled = true
+[passes.params]
+threshold_low = 0.30
+threshold_high = 0.85
+span_length = 0.15
+direction = 0.0
+
+[[passes]]
+shader = "block_corrupt"
+enabled = true
+[passes.params]
+corruption_rate = 0.20
+grid_scale = 15.0
+color_crush = 6.0
+
+[[passes]]
+shader = "rgb_wave"
+enabled = true
+[passes.params]
+amplitude = 0.008
+frequency = 10.0
+speed = 2.0
+
+[[passes]]
+shader = "halftone_cyber"
+enabled = true
+[passes.params]
+dot_scale = 95.0
+angle = 0.78
+contrast = 1.20
+blend = 0.70

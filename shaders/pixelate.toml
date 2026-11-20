@@ -1,0 +1,29 @@
+name = "pixelate"
+description = "Aspect-aware pixel grid quantization with optional color bit-depth crushing"
+author = "ninja-shader"
+language = "wgsl"
+source = "pixelate.wgsl"
+
+[[params]]
+name = "pixel_size"
+type = "float"
+default = 6.0
+min = 1.0
+max = 64.0
+description = "Quantized pixel block size"
+
+[[params]]
+name = "color_levels"
+type = "float"
+default = 16.0
+min = 2.0
+max = 64.0
+description = "Number of discrete color steps per channel"
+
+[[params]]
+name = "grid_line"
+type = "float"
+default = 0.15
+min = 0.0
+max = 1.0
+description = "Sub-pixel dark grid line intensity"

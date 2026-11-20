@@ -1,0 +1,50 @@
+name = "matrix_terminal"
+description = "Green digital code rain terminal on a curved CRT display with phosphor persistence"
+input = "test_input.mp4"
+output = "output/matrix_terminal.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "ascii_matrix"
+enabled = true
+[passes.params]
+cell_size = 8.0
+rain_speed = 3.0
+color_mix = 0.20
+glyph_color = [0.10, 1.0, 0.30]
+
+[[passes]]
+shader = "bloom"
+enabled = true
+[passes.params]
+threshold = 0.45
+intensity = 1.4
+radius = 3.0
+
+[[passes]]
+shader = "crt_scanlines"
+enabled = true
+[passes.params]
+curvature = 0.12
+scanline_intensity = 0.30
+scanline_count = 360.0
+
+[[passes]]
+shader = "motion_trails"
+enabled = true
+[passes.params]
+decay = 0.40
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.85
+radius = 0.70
+softness = 0.45
+tint = [0.0, 0.05, 0.01]

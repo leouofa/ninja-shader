@@ -1,0 +1,41 @@
+name = "predator_thermal"
+description = "Tactical FLIR thermal infrared heat vision with HUD reticle and CRT scanlines"
+input = "test_input.mp4"
+output = "output/predator_thermal.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "thermal_infrared"
+enabled = true
+[passes.params]
+heat_gain = 1.25
+contrast = 1.30
+isotherm_lines = 0.20
+
+[[passes]]
+shader = "radar_hud"
+enabled = true
+[passes.params]
+sweep_speed = 1.5
+reticle_scale = 0.35
+hud_opacity = 0.70
+hud_color = [1.0, 0.25, 0.1]
+
+[[passes]]
+shader = "crt_scanlines"
+enabled = true
+[passes.params]
+curvature = 0.08
+scanline_intensity = 0.20
+scanline_count = 380.0
+
+[[passes]]
+shader = "chromatic_aberration"
+enabled = true
+[passes.params]
+amount = 0.007
