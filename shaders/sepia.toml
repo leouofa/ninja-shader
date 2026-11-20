@@ -1,0 +1,13 @@
+name = "sepia"
+description = "Custom sepia shader effect"
+author = "Your Name"
+language = "wgsl"
+source = "sepia.wgsl"
+
+[[params]]
+name = "strength"
+type = "float"
+default = 1.0
+min = 0.0
+max = 2.0
+description = "Effect intensity multiplier"

@@ -1,0 +1,29 @@
+name = "crt_scanlines"
+description = "Simulates retro CRT monitor barrel distortion, animated phosphor scanlines, and vignette"
+author = "ninja-shader"
+language = "wgsl"
+source = "crt_scanlines.wgsl"
+
+[[params]]
+name = "curvature"
+type = "float"
+default = 0.12
+min = 0.0
+max = 0.5
+description = "Screen barrel curvature distortion"
+
+[[params]]
+name = "scanline_intensity"
+type = "float"
+default = 0.25
+min = 0.0
+max = 1.0
+description = "Darkness of horizontal scanlines"
+
+[[params]]
+name = "scanline_count"
+type = "float"
+default = 360.0
+min = 50.0
+max = 1080.0
+description = "Number of horizontal scanlines across vertical axis"

@@ -1,0 +1,39 @@
+name = "noir_film"
+description = "Classic noir cinema look: desaturation, subtle texture overlay, grainy texture, and deep vignette"
+input = "test_input.mp4"
+output = "output_noir_film.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "grayscale"
+enabled = true
+[passes.params]
+strength = 1.0
+
+[[passes]]
+shader = "texture_overlay"
+enabled = true
+[passes.params]
+opacity = 0.25
+uv_scale = 8.0
+
+[[passes]]
+shader = "film_grain"
+enabled = true
+[passes.params]
+intensity = 0.10
+size = 1.5
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 1.0
+radius = 0.65
+softness = 0.50
+tint = [0.02, 0.02, 0.03]

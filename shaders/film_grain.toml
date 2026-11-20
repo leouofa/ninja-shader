@@ -1,0 +1,21 @@
+name = "film_grain"
+description = "Animated procedural film grain noise driven by frame and time"
+author = "ninja-shader"
+language = "glsl"
+source = "film_grain.glsl"
+
+[[params]]
+name = "intensity"
+type = "float"
+default = 0.08
+min = 0.0
+max = 0.5
+description = "Noise contrast and intensity"
+
+[[params]]
+name = "size"
+type = "float"
+default = 1.0
+min = 0.5
+max = 5.0
+description = "Pixel grain size"

@@ -1,0 +1,27 @@
+name = "texture_overlay"
+description = "Blends an external image or pattern texture over the video with configurable opacity"
+author = "ninja-shader"
+language = "wgsl"
+source = "texture_overlay.wgsl"
+
+[[params]]
+name = "opacity"
+type = "float"
+default = 0.5
+min = 0.0
+max = 1.0
+description = "Blend opacity"
+
+[[params]]
+name = "uv_scale"
+type = "float"
+default = 4.0
+min = 0.1
+max = 32.0
+description = "Tiling scale of the overlay texture"
+
+[[textures]]
+name = "overlay_tex"
+default = "assets/pattern.png"
+filter = "linear"
+address_mode = "repeat"

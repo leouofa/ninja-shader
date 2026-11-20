@@ -1,0 +1,13 @@
+name = "chromatic_aberration"
+description = "Separates RGB color channels radially from screen center"
+author = "ninja-shader"
+language = "glsl"
+source = "chromatic_aberration.glsl"
+
+[[params]]
+name = "amount"
+type = "float"
+default = 0.008
+min = 0.0
+max = 0.05
+description = "Displacement distance of color channels"

@@ -1,0 +1,13 @@
+name = "grayscale"
+description = "Adjusts color saturation from full color down to monochrome"
+author = "ninja-shader"
+language = "wgsl"
+source = "grayscale.wgsl"
+
+[[params]]
+name = "strength"
+type = "float"
+default = 1.0
+min = 0.0
+max = 1.0
+description = "Desaturation amount: 0.0 = full color, 1.0 = full monochrome"

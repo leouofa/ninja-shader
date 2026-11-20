@@ -1,0 +1,46 @@
+name = "retro_crt"
+description = "Vintage CRT TV look with chromatic aberration, curvature, scanlines, phosphor decay, film grain, and vignette"
+input = "test_input.mp4"
+output = "output_retro_crt.mp4"
+
+[settings]
+scale = 1.0
+crf = 18
+preset = "medium"
+copy_audio = true
+
+[[passes]]
+shader = "chromatic_aberration"
+enabled = true
+[passes.params]
+amount = 0.006
+
+[[passes]]
+shader = "crt_scanlines"
+enabled = true
+[passes.params]
+curvature = 0.12
+scanline_intensity = 0.30
+scanline_count = 360.0
+
+[[passes]]
+shader = "motion_trails"
+enabled = true
+[passes.params]
+decay = 0.35
+
+[[passes]]
+shader = "film_grain"
+enabled = true
+[passes.params]
+intensity = 0.06
+size = 1.0
+
+[[passes]]
+shader = "vignette"
+enabled = true
+[passes.params]
+intensity = 0.80
+radius = 0.75
+softness = 0.40
+tint = [0.0, 0.0, 0.0]
